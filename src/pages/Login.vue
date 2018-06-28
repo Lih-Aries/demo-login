@@ -3,11 +3,11 @@
     <label for="userName">用户名：</label>
     <input type="text"
            placeholder="请输入用户名"
-           @focus="focusUserName"
-           @input="handleUserName"
+           @focus="focusUsername"
+           @input="handleUsername"
            v-model="curName">
     <span v-show="uMesVisible"
-          :class="isSuc">{{nameMes}}</span>
+          :class="uSuc">{{nameMes}}</span>
     <br/>
     <label for="password">密码：</label>
     <input type="password"
@@ -16,7 +16,7 @@
            @input="handlePassword"
            v-model="curPwd">
     <span v-show="pMesVisible"
-          :class="isSuc">{{pwdMes}}</span>
+          :class="pSuc">{{pwdMes}}</span>
     <br/>
     <button type="submit" @click="handleLogin">立即登录</button>
     <p v-if="isLogin">{{loginMes}}</p>
@@ -24,91 +24,122 @@
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex';
 export default {
-  name: "HelloWorld",
   data() {
     return {
-      curName: "",
-      curPwd: "",
-      nameMes: "",
-      pwdMes: "",
-      loginMes: "",
-      uMesVisible: false,
-      pMesVisible: false,
-      isLogin: false,
-      isSuc: ""
+      nameMes: '',
+      pwdMes: '',
+      loginMes: '',
+      uSuc: '',
+      pSuc: ''
     };
   },
-  methods: {
-    // 用户名输入框获取焦点
-    focusUserName: function() {
-      this.uMesVisible = true;
-      this.nameMes = "用户名请输入4~10位字母或数字";
-      this.isSuc = "suc";
-    },
-    // 用户名输入
-    handleUserName: function(e) {
-      const uReg = /[^\a-zA-Z0-9]/g;
-      const len = e.target.value.length;
-      if (uReg.test(e.target.value)) {
-        // 含有非法字符
-        this.isSuc = "err";
-        this.nameMes = "禁止输入非法字符";
-        this.curName = e.target.value.substring(0, len - 1);
-      } else if (e.target.value == "") {
-        // 用户名为空
-        this.isSuc = "err";
-        this.nameMes = "用户名不能为空";
-      } else if (len < 4) {
-        // 少于4个字符
-        this.isSuc = "err";
-        this.nameMes = "用户名不能少于4个字符";
-      } else if (len > 20) {
-        // 大于20个字符
-        this.isSuc = "err";
-        this.nameMes = "用户名不能大于20个字符";
-        this.curName = e.target.value.substring(0, 20);
-      } else {
-        // 合法字符
-        this.uMesVisible = true;
-        this.nameMes = "OK！";
-        this.isSuc = "suc";
+  computed: {
+    ...mapState({
+      uMesVisible: state => state.uMesVisible,
+      pMesVisible: state => state.pMesVisible,
+      isLogin: state => state.isLogin
+    }),
+    curName: {
+      get () {
+        return this.$store.state.curName
+      },
+      set (user) {
+        this.$store.commit('validUsername', user)
       }
     },
-    // 密码输入框获取焦点
-    focusPassword: function() {
-      this.pMesVisible = true;
-      this.pwdMes = "密码由6~12个字母、数字或下划线组合字符";
-      this.isSuc = "suc";
+    curPwd: {
+      get () {
+        return this.$store.state.curPwd
+      },
+      set (pwd) {
+        this.$store.commit('validPassword', pwd)
+      }
+    }
+  },
+  methods: {
+    ...mapActions([
+      'getFocusUsername',
+      'getFocusPassword',
+      'getLogin'
+    ]),
+    focusUsername(){
+      this.getFocusUsername();
+      this.nameMes = '用户名请输入4~10位字母或数字';
+      this.uSuc = 'suc';
     },
-    // 密码输入
-    handlePassword: function() {
+    handleUsername() {
+      const uReg = /[^\a-zA-Z0-9]/g;
+      const len = this.curName.length;
+      const isValid = uReg.test(this.curName);
+      const isEmpty = !!(this.curName == '');
+      const isIt4 = !!(len < 4);
+      const isGt20 = !!(len > 20);
+      this.getFocusUsername();
+      this.nameMes = "OK！";
+      this.uSuc = "suc";
+      if (isValid) {
+        this.uSuc = "err";
+        this.nameMes = "禁止输入非法字符";
+        this.curName = this.curName.substring(0, len - 1);
+      }
+      if (isEmpty) {
+        this.uSuc = "err";
+        this.nameMes = "用户名不能为空";
+      }
+      if (!isEmpty && isIt4) {
+        this.uSuc = "err";
+        this.nameMes = "用户名不能少于4个字符";
+      }
+      if (isGt20) {
+        this.uSuc = "err";
+        this.nameMes = "用户名不能大于20个字符";
+        this.curName = this.curName.substring(0, 20);
+      }
+    },
+    focusPassword() {
+      this.getFocusPassword();
+      this.pwdMes = '密码由6~12个字母、数字或下划线组合字符';
+      this.pSuc = 'suc';
+    },
+    handlePassword() {
       const pReg1 = /[^\d]/;
       const pReg2 = /[^\a-zA-Z]/;
       const len = this.curPwd.length;
-      if (len == 0) {
+      const isEmpty = !!(this.curPwd == '');
+      const isValid = !!(len < 6 || len > 12);
+      const isNum = pReg1.test(this.curPwd);
+      const isLetter = pReg2.test(this.curPwd);
+      this.getFocusPassword();
+      this.pwdMes = "Ok！";
+      this.pSuc = "suc";
+      if (isEmpty) {
         this.pwdMes = "密码不能为空";
-        this.isSuc = "err";
-      } else if (len < 6 || len > 12) {
+        this.pSuc = "err";
+      }
+      if (isValid) {
         this.pwdMes = "密码为6~12字符";
-        this.isSuc = "err";
-      } else if (!pReg1.test(this.curPwd)) {
+        this.pSuc = "err";
+      }
+      if (!isNum) {
         this.pwdMes = "密码不能全为数字";
-        this.isSuc = "err";
-      } else if (!pReg2.test(this.curPwd)) {
+        this.pSuc = "err";
+      }
+      if (!isLetter) {
         this.pwdMes = "密码不能全为字母";
-        this.isSuc = "err";
-      } else {
-        this.pMesVisible = true;
-        this.pwdMes = "Ok！";
-        this.isSuc = "suc";
+        this.pSuc = "err";
       }
     },
-    handleLogin: function() {
-      this.isLogin = true;
-      this.isSuc = "err";
+    handleLogin() {
+      console.log(this)
+      this.getLogin();
+      this.uSuc = "suc";
+      this.pSuc = 'suc';
       this.loginMes = "登录成功！！！";
       if (this.curName == "" || this.curPwd == "") {
+        this.uSuc = "err";
+        this.pSuc = 'err';
         this.loginMes = "请检查用户名或密码";
       }
     }
