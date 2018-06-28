@@ -76,26 +76,25 @@ export default {
       const isEmpty = !!(this.curName == '');
       const isIt4 = !!(len < 4);
       const isGt20 = !!(len > 20);
-      this.getFocusUsername();
-      this.nameMes = "OK！";
-      this.uSuc = "suc";
+      this.uSuc = 'err';
+      if (isIt4) {
+        this.nameMes = "用户名不能少于4个字符";
+      }
+      if (isGt20) {
+        this.nameMes = "用户名不能大于20个字符";
+        this.curName = this.curName.substring(0, 20);
+      }
       if (isValid) {
-        this.uSuc = "err";
         this.nameMes = "禁止输入非法字符";
         this.curName = this.curName.substring(0, len - 1);
       }
       if (isEmpty) {
-        this.uSuc = "err";
         this.nameMes = "用户名不能为空";
       }
-      if (!isEmpty && isIt4) {
-        this.uSuc = "err";
-        this.nameMes = "用户名不能少于4个字符";
-      }
-      if (isGt20) {
-        this.uSuc = "err";
-        this.nameMes = "用户名不能大于20个字符";
-        this.curName = this.curName.substring(0, 20);
+      if(!(isIt4 || isGt20)){
+        this.getFocusUsername();
+        this.nameMes = "OK！";
+        this.uSuc = "suc";
       }
     },
     focusPassword() {
@@ -111,28 +110,25 @@ export default {
       const isValid = !!(len < 6 || len > 12);
       const isNum = pReg1.test(this.curPwd);
       const isLetter = pReg2.test(this.curPwd);
-      this.getFocusPassword();
-      this.pwdMes = "Ok！";
-      this.pSuc = "suc";
-      if (isEmpty) {
-        this.pwdMes = "密码不能为空";
-        this.pSuc = "err";
-      }
+      this.pSuc = "err";
       if (isValid) {
         this.pwdMes = "密码为6~12字符";
-        this.pSuc = "err";
+      } else {
+        this.getFocusPassword();
+        this.pwdMes = "Ok！";
+        this.pSuc = "suc";
       }
       if (!isNum) {
         this.pwdMes = "密码不能全为数字";
-        this.pSuc = "err";
       }
       if (!isLetter) {
         this.pwdMes = "密码不能全为字母";
-        this.pSuc = "err";
+      }
+      if (isEmpty) {
+        this.pwdMes = "密码不能为空";
       }
     },
     handleLogin() {
-      console.log(this)
       this.getLogin();
       this.uSuc = "suc";
       this.pSuc = 'suc';
