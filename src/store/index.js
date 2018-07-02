@@ -7,7 +7,8 @@ const createStore = () => {
       curPwd: '',
       uMesVisible: false,
       pMesVisible: false,
-      isLogin: false
+      isLogin: false,
+      modal: false
     },
     mutations: {
       focusUsername (state) {
@@ -24,17 +25,29 @@ const createStore = () => {
       },
       login (state) {
         state.isLogin = true
+      },
+      modal (state) {
+        state.modal = true
       }
     },
     actions: {
       getFocusUsername ({commit}) {
         return commit('focusUsername')
       },
+      getValidUsername ({commit}) {
+        return commit('validUsername')
+      },
       getFocusPassword ({commit}) {
         return commit('focusPassword')
       },
+      getValidPassword ({commit}) {
+        return commit('validPassword')
+      },
       getLogin ({commit}) {
         return commit('login')
+      },
+      getModal ({commit}) {
+        return commit('modal')
       }
     }
   })

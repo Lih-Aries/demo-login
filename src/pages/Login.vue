@@ -5,7 +5,7 @@
            placeholder="请输入用户名"
            @focus="focusUsername"
            @input="handleUsername"
-           v-model="curName">
+           :value="curName">
     <span v-show="uMesVisible"
           :class="uSuc">{{nameMes}}</span>
     <br/>
@@ -14,18 +14,26 @@
            placeholder="请输入密码"
            @focus="focusPassword"
            @input="handlePassword"
-           v-model="curPwd">
+           :value="curPwd">
     <span v-show="pMesVisible"
           :class="pSuc">{{pwdMes}}</span>
     <br/>
     <button type="submit" @click="handleLogin">立即登录</button>
     <p v-if="isLogin">{{loginMes}}</p>
+    <div class="modal" v-show="modal">
+      <p>登录中...</p>
+      <a href="/" class="btn">确定</a>
+    </div>
   </div>
 </template>
 
 <script>
 import { mapState, mapActions } from 'vuex';
+// import Modal from '~/components/Modal';
 export default {
+  // components: {
+  //   Modal
+  // },
   data() {
     return {
       nameMes: '',
@@ -39,7 +47,8 @@ export default {
     ...mapState({
       uMesVisible: state => state.uMesVisible,
       pMesVisible: state => state.pMesVisible,
-      isLogin: state => state.isLogin
+      isLogin: state => state.isLogin,
+      modal: state => state.modal
     }),
     curName: {
       get () {
@@ -61,40 +70,46 @@ export default {
   methods: {
     ...mapActions([
       'getFocusUsername',
+      // 'getValidUsername',
       'getFocusPassword',
-      'getLogin'
+      // 'getValidPassword',
+      'getLogin',
+      'getModal'
     ]),
     focusUsername(){
       this.getFocusUsername();
-      this.nameMes = '用户名请输入4~10位字母或数字';
+      this.nameMes = '用户名请输入4~20位字母或数字';
       this.uSuc = 'suc';
     },
-    handleUsername() {
+    handleUsername(e) {
       const uReg = /[^\a-zA-Z0-9]/g;
-      const len = this.curName.length;
-      const isValid = uReg.test(this.curName);
-      const isEmpty = !!(this.curName == '');
+      const len = e.target.value.length;
+      const isValid = uReg.test(e.target.value);
+      const isEmpty = !!(e.target.value == '');
       const isIt4 = !!(len < 4);
       const isGt20 = !!(len > 20);
-      this.uSuc = 'err';
+      this.curName = e.target.value;
+      this.nameMes = "OK！";
+      this.uSuc = "suc";
       if (isIt4) {
+        this.uSuc = 'err';
         this.nameMes = "用户名不能少于4个字符";
+        this.curName = e.target.value;
       }
       if (isGt20) {
+        this.uSuc = 'err';
         this.nameMes = "用户名不能大于20个字符";
-        this.curName = this.curName.substring(0, 20);
+        const curVal = e.target.value.substring(0, 20);
+        this.curName = curVal;
       }
       if (isValid) {
+        this.uSuc = 'err';
         this.nameMes = "禁止输入非法字符";
-        this.curName = this.curName.substring(0, len - 1);
+        this.curName = e.target.value.substring(0, len - 1);
       }
       if (isEmpty) {
+        this.uSuc = 'err';
         this.nameMes = "用户名不能为空";
-      }
-      if(!(isIt4 || isGt20)){
-        this.getFocusUsername();
-        this.nameMes = "OK！";
-        this.uSuc = "suc";
       }
     },
     focusPassword() {
@@ -102,41 +117,40 @@ export default {
       this.pwdMes = '密码由6~12个字母、数字或下划线组合字符';
       this.pSuc = 'suc';
     },
-    handlePassword() {
+    handlePassword(e) {
       const pReg1 = /[^\d]/;
       const pReg2 = /[^\a-zA-Z]/;
-      const len = this.curPwd.length;
-      const isEmpty = !!(this.curPwd == '');
+      const len = e.target.value.length;
+      const isEmpty = !!(e.target.value == '');
       const isValid = !!(len < 6 || len > 12);
-      const isNum = pReg1.test(this.curPwd);
-      const isLetter = pReg2.test(this.curPwd);
-      this.pSuc = "err";
+      const isNum = pReg1.test(e.target.value);
+      const isLetter = pReg2.test(e.target.value);
+      this.curPwd = e.target.value;
+      this.pwdMes = "Ok！";
+      this.pSuc = "suc";
       if (isValid) {
+        this.pSuc = 'err';
         this.pwdMes = "密码为6~12字符";
-      } else {
-        this.getFocusPassword();
-        this.pwdMes = "Ok！";
-        this.pSuc = "suc";
       }
       if (!isNum) {
+        this.pSuc = 'err';
         this.pwdMes = "密码不能全为数字";
       }
       if (!isLetter) {
+        this.pSuc = 'err';
         this.pwdMes = "密码不能全为字母";
       }
       if (isEmpty) {
+        this.pSuc = 'err';
         this.pwdMes = "密码不能为空";
       }
     },
     handleLogin() {
       this.getLogin();
-      this.uSuc = "suc";
-      this.pSuc = 'suc';
-      this.loginMes = "登录成功！！！";
-      if (this.curName == "" || this.curPwd == "") {
-        this.uSuc = "err";
-        this.pSuc = 'err';
-        this.loginMes = "请检查用户名或密码";
+      this.loginMes = "请检查用户名或密码";
+      if(this.curName && this.curPwd){
+        this.getModal();
+        this.loginMes = "登录成功！！！";
       }
     }
   }
@@ -172,5 +186,24 @@ span {
 }
 .err {
   color: #e03b15;
+}
+.modal{
+  width: 360px;
+  height: 120px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  background-color: #fff;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-left: -180px;
+  margin-top: -60px;
+}
+.btn{
+  display: inline-block;
+  padding: 6px 15px;
+  color: #fff;
+  background-color: darkcyan;
+  border-radius: 2px;
 }
 </style>
