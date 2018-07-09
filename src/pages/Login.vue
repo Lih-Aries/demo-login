@@ -22,7 +22,7 @@
     <p v-if="isLogin">{{loginMes}}</p>
     <div class="modal" v-show="modal">
       <p>登录中...</p>
-      <a href="/" class="btn">确定</a>
+      <router-link to="/todo" class="btn">确定</router-link>
     </div>
   </div>
 </template>
@@ -158,6 +158,9 @@ export default {
 </script>
 
 <style scoped>
+.login{
+  margin-top: 200px;
+}
 label {
   display: inline-block;
   width: 100px;

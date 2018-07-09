@@ -9,13 +9,13 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'TodoList',
-      component: TodoList
-    },
-    {
-      path: '/login',
       name: 'login',
       component: Login
+    },
+    {
+      path: '/todo',
+      name: 'TodoList',
+      component: TodoList
     }
   ]
 })

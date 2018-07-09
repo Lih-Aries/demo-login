@@ -1,6 +1,7 @@
 <template>
-    <li @click="itemDel">
-      {{index}}--{{content}}
+    <li>
+      <label>{{index}}--{{content}}</label>
+      <span @click="itemDel">删除</span>
     </li>
 </template>
 
@@ -17,8 +18,24 @@
 
 <style scoped>
 li{
-  padding:6px 10px;
-  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  padding:15px 10px;
+  border-bottom: 1px solid #eee;
+  list-style-position: inside;
+}
+label{
+  display: inline-block;
+}
+span{
+  visibility: hidden;
   cursor: pointer;
+}
+li:hover{
+  background-color: beige;
+}
+li:hover span{
+  visibility: visible;
 }
 </style>
